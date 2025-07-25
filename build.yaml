@@ -1,0 +1,2 @@
+config:
+  replaces: authorino-operator.v0.20.0
