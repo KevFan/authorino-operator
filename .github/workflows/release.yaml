@@ -57,12 +57,20 @@ jobs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add -A && git commit -m "Prepared release v${{ github.event.inputs.operatorVersion }}"
         git push origin release-v${{ github.event.inputs.operatorVersion }}
+    # Workaround to correctly build the changelog until https://github.com/softprops/action-gh-release/pull/372 has been merged
+    - name: Build Changelog
+      id: build_changelog
+      uses: mikepenz/release-changelog-builder-action@v5
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Create release
       uses: softprops/action-gh-release@v2
       with:
         name: v${{ github.event.inputs.operatorVersion }}
         tag_name: v${{ github.event.inputs.operatorVersion }}
-        body: "**This release enables installations of Authorino v${{ github.event.inputs.authorinoVersion }}**"
-        generate_release_notes: true
+        body: |
+          **This release enables installations of Authorino v${{ github.event.inputs.authorinoVersion }}** 
+          
+          ${{steps.build_changelog.outputs.changelog}}
         target_commitish: release-v${{ github.event.inputs.operatorVersion }}
         prerelease: ${{ github.event.inputs.prerelease }}
